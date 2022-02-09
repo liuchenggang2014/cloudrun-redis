@@ -1,0 +1,35 @@
+# In this directory, run the following command to build this builder.
+# $ gcloud builds submit . --config=cloudbuild.yaml --substitutions _BUCKET='<bucket name>'
+steps:
+#1: build the get token image
+- name: 'gcr.io/cloud-builders/docker'
+  args: ['build', '-t', '${_IMAGE_NAME}', '.']
+
+#2. Push the container image to Container Registry
+- name: 'gcr.io/cloud-builders/docker'
+  args: ['push', '${_IMAGE_NAME}']
+
+#3---4 options. leverage gcloud command to deploy cloud run
+- name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+  entrypoint: gcloud
+  args: ['run', 'deploy', 'run-redis', '--image', '${_IMAGE_NAME}', 
+  '--region=${_REGION}', '--platform', 'managed', '--allow-unauthenticated', '--port=3000',
+  '--service-account=${_SA_MAIL}', '--vpc-connector=${_VPC_CONNECTOR}',
+  '--set-env-vars', 'REDIS_IP=${_REDIS_IP_ADDRESS}'] 
+
+# push the image into registry
+images:
+- ${_IMAGE_NAME}
+
+# _REGION: the region of cloud run deployment
+# _IMAGE_NAME: the image name to build contianer and deploy cloud run
+# _SA_MAIL: the service acccount bind to the cloud run service
+# _VPC_CONNECTOR: the vpc connect created before to connect redis or gce 
+substitutions:
+  _REGION: us-central1
+  _IMAGE_NAME: gcr.io/cliu201/getloggingtoken
+  _SA_MAIL: cliu201-sa@cliu201.iam.gserviceaccount.com
+  _VPC_CONNECTOR: cloudrun-redis-connector
+  _REDIS_IP_ADDRESS: 10.36.64.19
+tags: ['run-redis']
+timeout: 1000s
