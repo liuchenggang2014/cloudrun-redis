@@ -15,7 +15,7 @@ steps:
   args: ['run', 'deploy', 'run-redis', '--image', '${_IMAGE_NAME}', 
   '--region=${_REGION}', '--platform', 'managed', '--allow-unauthenticated', '--port=3000',
   '--service-account=${_SA_MAIL}', '--vpc-connector=${_VPC_CONNECTOR}',
-  '--set-env-vars', 'REDIS_IP=${_REDIS_IP_ADDRESS}'] 
+  '--set-env-vars', 'REDIS_IP=${_REDIS_IP_ADDRESS},CLOUDSQL_CONN_NAME=${_CLOUDSQL_CONN_NAME},CLOUDSQL_USER=${_CLOUDSQL_USER},CLOUDSQL_PW=${_CLOUDSQL_PW},CLOUDSQL_DB=${_CLOUDSQL_DB}'] 
 
 # push the image into registry
 images:
@@ -27,9 +27,13 @@ images:
 # _VPC_CONNECTOR: the vpc connect created before to connect redis or gce 
 substitutions:
   _REGION: us-central1
-  _IMAGE_NAME: gcr.io/cliu201/getloggingtoken
+  _IMAGE_NAME: gcr.io/cliu201/run2db
   _SA_MAIL: cliu201-sa@cliu201.iam.gserviceaccount.com
   _VPC_CONNECTOR: cloudrun-redis-connector
   _REDIS_IP_ADDRESS: 10.36.64.19
+  _CLOUDSQL_CONN_NAME: cliu201:asia-east1:cliu
+  _CLOUDSQL_USER: root
+  _CLOUDSQL_PW: changeme
+  _CLOUDSQL_DB: run_mysql
 tags: ['run-redis']
 timeout: 1000s

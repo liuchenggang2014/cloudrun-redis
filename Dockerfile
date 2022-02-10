@@ -15,5 +15,7 @@ COPY app/ .
 
 EXPOSE 3000
 
+ENV PYTHONUNBUFFERED True
+
 # command to run on container start
 CMD [ "python", "./cloudrun_redis.py" ]
